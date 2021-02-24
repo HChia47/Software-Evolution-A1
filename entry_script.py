@@ -1,8 +1,10 @@
 import csv
 import sys
 import nltk
-import pandas
-
+import pandas as pd
+import numpy as np
+nltk.download('punkt')
+from nltk.tokenize import word_tokenize
 
 
 def write_output_file():
@@ -54,8 +56,34 @@ if __name__ == "__main__":
     print('The nltk version is {}.'.format(nltk.__version__))
     
     def getInputLowRequirements():
-        df = pandas.read_csv("/input/low.csv")
+        df = pd.read_csv("/input/low.csv")
+        return df
+
+    def getInputHighRequirements():
+        df = pd.read_csv("/input/high.csv")
         return df
     
-    print(getInputLowRequirements())
+    # Tokenize a sentence and remove commas and dots
+    def tokenizeSentence(sentence):
+        tokens = word_tokenize(sentence)
+        i = 0
+        while i < len(tokens):
+            if tokens[i] == '.':
+                tokens.remove('.')
+            elif tokens[i] ==  ',':
+                tokens.remove(',')   
+            else:
+                i+=1
+        return tokens
+
+    
+    dfLow = getInputLowRequirements()
+    npLow = dfLow.to_numpy()
+    print(npLow)
+    print(npLow[0,0])
+    print(npLow[0, :])
+    print(word_tokenize(npLow[0,1]))
+    tokensLow1 = tokenizeSentence(npLow[0,1])
+    print(tokensLow1)
+    print(type(tokensLow1))
     write_output_file()
