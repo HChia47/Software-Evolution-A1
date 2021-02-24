@@ -134,12 +134,23 @@ if __name__ == "__main__":
         print(type(listReqAndTokens))
         return listReqAndTokens
 
+    def extendsAllTokenizedLists(tokenizedData):
+        extTokList = []
+        for x in tokenizedData:
+            extTokList.extend(x[1])
+        return extTokList
+
     dataLow = getInputLowRequirements()
     dataHigh = getInputHighRequirements()
 
     stemmer = PorterStemmer()
     tokenizeDataLow = tokenizeAllRequirements(dataLow)
     tokenizeDataHigh = tokenizeAllRequirements(dataHigh)
+
+    extTokListLow = extendsAllTokenizedLists(tokenizeDataLow)
+    print("extTokListLow")
+    print(extTokListLow)
+    extTokListHigh = extendsAllTokenizedLists(tokenizeDataHigh)
 
 
 
