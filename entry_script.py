@@ -8,6 +8,7 @@ nltk.download('stopwords')
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
+from nltk.stem.porter import *
 
 
 def write_output_file():
@@ -95,6 +96,7 @@ if __name__ == "__main__":
         tokens = tokenizer.tokenize(sentence)
         i = 0
         while i < len(tokens):
+            tokens[i] = tokens[i].lower()
             stop_words = set(stopwords.words('english'))
             if tokens[i] in stop_words:
                 tokens.remove(tokens[i])
@@ -102,15 +104,16 @@ if __name__ == "__main__":
                 i+=1   
         return tokens
 
+    def stemmedSentences(list):
+        stemmedlist = [stemmer.stem(token) for token in list ]
+        return stemmedlist
+        
+
+
     def tokenizeAllRequirements(data):
         listReqAndTokens = []
-        print("tokenizeAllReq")
         allReqIDs = data[:, 0]
-        print("allReqIDs")
-        print(allReqIDs)
         allReqSentences = data[:, 1]
-        print("allReqSentences")
-        print(allReqSentences)
         allReqTokenizedSentences = []
         for x in allReqSentences:
             allReqTokenizedSentences.append(tokenizeSentenceRegex(x))
@@ -118,7 +121,11 @@ if __name__ == "__main__":
         print("allReqTokenizedSentences")
         print(allReqTokenizedSentences)
 
-        for ID, Sentence in zip(allReqIDs, allReqTokenizedSentences):
+        allReqTokenizedStemmedSentences = []
+        for x in allReqTokenizedSentences:
+            allReqTokenizedStemmedSentences.append(stemmedSentences(x))
+
+        for ID, Sentence in zip(allReqIDs, allReqTokenizedStemmedSentences):
             tempList = [ID, Sentence]
             listReqAndTokens.append(tempList)
 
@@ -130,7 +137,11 @@ if __name__ == "__main__":
     dataLow = getInputLowRequirements()
     dataHigh = getInputHighRequirements()
 
+    stemmer = PorterStemmer()
     tokenizeDataLow = tokenizeAllRequirements(dataLow)
     tokenizeDataHigh = tokenizeAllRequirements(dataHigh)
+
+
+
 
     write_output_file()
