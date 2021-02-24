@@ -1,7 +1,7 @@
 import csv
 import sys
-
-
+import nltk
+import pandas
 
 
 
@@ -51,5 +51,11 @@ if __name__ == "__main__":
     assignment on Canvas. Please ensure that you take care to deliver clean,
     modular, and well-commented code.
     '''
-
+    print('The nltk version is {}.'.format(nltk.__version__))
+    
+    def getInputLowRequirements():
+        df = pandas.read_csv("/input/low.csv")
+        return df
+    
+    print(getInputLowRequirements())
     write_output_file()
