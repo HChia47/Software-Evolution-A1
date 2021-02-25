@@ -9,6 +9,7 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
 from nltk.stem.porter import *
+from collections import Counter
 
 
 def write_output_file():
@@ -140,9 +141,9 @@ if __name__ == "__main__":
             extTokList.extend(x[1])
         return extTokList
 
-    # make dictionary
+    # Complete master dictionary
 
-    # frequecy of word direct
+    # frequecy of word dictionary
     def masterDictionaryCountMethod(listWords):
         dictCount = dict((x,listWords.count(x)) for x in set(listWords))
         print(dictCount)
@@ -154,8 +155,17 @@ if __name__ == "__main__":
         print(totalAmountRequirements)
         return totalAmountRequirements
 
-    # in how many requirements is the word 
-
+    # in how many requirements is the word
+    def checkWordInNumberOfRequirements(noDubList,emptyMasterDict,allRequirement):
+        for word in noDubList:
+            i = 0
+            while i < len(allRequirement):
+                if word in allRequirement[i][1]:
+                    emptyMasterDict[word] += 1
+                i+=1
+        return emptyMasterDict
+                
+                
     #list no duplicates
     def noDubListMethode(list):
         newlist = []
@@ -186,12 +196,19 @@ if __name__ == "__main__":
     extTokListCopy = extTokListOriginal
     extTokListCopy1 = extTokListOriginal
 
-    noDublist = noDubListMethode(extTokListCopy1)
+    noDubList = noDubListMethode(extTokListCopy1)
 
     masterDictionaryEmpty = { word : 0 for word in extTokListHigh}
     print(masterDictionaryEmpty)
     masterDictionaryCount = masterDictionaryCountMethod(extTokListCopy)
     totalAmountRequirements = countAllRequirement(tokenizeDataLow,tokenizeDataHigh)
+    masterDictionaryEmpty = checkWordInNumberOfRequirements(noDubList,masterDictionaryEmpty,tokenizeDataLow)
+    print(masterDictionaryEmpty)
+    masterDictionaryEmpty = checkWordInNumberOfRequirements(noDubList,masterDictionaryEmpty,tokenizeDataHigh)
+    print(masterDictionaryEmpty)
+    masterDictionaryFull = masterDictionaryEmpty
+    print(masterDictionaryFull)
+
 
 
     write_output_file()
