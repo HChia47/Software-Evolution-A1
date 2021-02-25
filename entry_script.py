@@ -169,11 +169,7 @@ def noDubListMethode(list):
     for i in list:
         if i not in newlist:
             newlist.append(i)
-    print("noDubList")
-    print(newlist)
     sortedlist = sorted(newlist)
-    print("sortedlist")
-    print(sortedlist)
     return sortedlist
 
 #create a vector representation for a requirement
@@ -362,7 +358,6 @@ def onlyBinaryValues(binaryList):
     completeBinaryList = []
     for dicts in binaryList:
         binaryValues = dicts.values()
-        print(binaryValues)
         completeBinaryList.extend(binaryValues)
     return completeBinaryList
 
