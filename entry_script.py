@@ -366,6 +366,57 @@ def onlyBinaryValues(binaryList):
         completeBinaryList.extend(binaryValues)
     return completeBinaryList
 
+def binaryXORmethod(binarylistManual,binaryListTool):
+    bitsXOR = np.bitwise_xor(binarylistManual,binaryListTool)
+    return(bitsXOR.tolist())
+    
+def transformBinaryIntoOutput(functionalRequirementList,useCaseList,binaryMethod):
+    i=0
+    outputList = []
+    binarycounter = 0
+    while i < len(functionalRequirementList):
+        functionlist = []
+        insideUseCaseList = []
+        j = 0
+        while j < len(useCaseList):
+            if j == 0:
+                functionlist.append(functionalRequirementList[i])
+            elif binaryMethod[binarycounter] == 1:
+                insideUseCaseList.append(useCaseList[j])
+                binarycounter+=1
+            else:
+                binarycounter+=1
+            j+=1
+        functionlist.append(insideUseCaseList)
+        outputList.append(functionlist)
+        i+=1
+    return(outputList)
+
+def write_output_fileMisHap(traceLinks):
+    '''
+    Writes a dummy output file using the python csv writer, update this 
+    to accept as parameter the found trace links. 
+    '''
+    with open('/output/misclassifications.csv', 'w') as csvfile:
+
+        writer = csv.writer(csvfile, delimiter=",", quotechar="\"", quoting=csv.QUOTE_MINIMAL)
+
+
+        fieldnames = ["id", "links"]
+
+        writer.writerow(fieldnames)
+        #loop through the links and get the IDs to add to the writer in the correct format
+        for x in traceLinks:
+            tempX = x
+            strY = ""  
+            for y in range(len(tempX[1])):
+                if(y != (len(tempX[1]) - 1)):
+                    strY += x[1][y]
+                    strY += ","
+                else:
+                    strY += x[1][y]
+            writer.writerow([x[0], strY])
+
 
 if __name__ == "__main__":
     '''
@@ -487,6 +538,10 @@ if __name__ == "__main__":
     #tranform it in a from such that it can be filled in function confusion matrix
     binaryTraceLinkManualList = onlyBinaryValues(binaryTraceLinkManualList)
     binaryTraceLinkToolList = onlyBinaryValues(binaryTraceLinkToolList)
+
+    #create output csv file of all misclassifications
+    outputlistMishap = transformBinaryIntoOutput(functionalRequirementList,useCaseList,binaryXORmethod(binaryTraceLinkManualList,binaryTraceLinkToolList))
+    write_output_fileMisHap(outputlistMishap)
 
     #create the actual confusion matrix
     conf_mat = confusion_matrix(binaryTraceLinkManualList, binaryTraceLinkToolList)
