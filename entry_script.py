@@ -157,7 +157,6 @@ def checkWordInNumberOfRequirements(noDubList,emptyMasterDict,allRequirement):
 def idfMasterDictionary(dictionary, totalRequirements):
     for key in dictionary:
         dictionary[key] = math.log2(totalRequirements/dictionary.get(key))
-    print(dictionary)
     return dictionary            
             
 #list no duplicates
