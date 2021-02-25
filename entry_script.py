@@ -128,7 +128,6 @@ def extendsAllTokenizedLists(tokenizedData):
 def masterDictionaryFinished(dictionary,dictionary2):
     for k in dictionary.keys():
         dictionary[k] = dictionary[k] * dictionary2[k]
-        print(dictionary[k])
     # print(result)
     return dictionary
 
@@ -137,13 +136,11 @@ def masterDictionaryFinished(dictionary,dictionary2):
 # frequecy of word dictionary
 def masterDictionaryCountMethod(listWords):
     dictCount = dict((x,listWords.count(x)) for x in set(listWords))
-    print(dictCount)
     return dictCount
 
 # n total number of requirement
 def countAllRequirement(low,high):
     totalAmountRequirements =len(low)+len(high)
-    print(totalAmountRequirements)
     return totalAmountRequirements
 
 # in how many requirements is the word
