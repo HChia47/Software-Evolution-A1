@@ -140,6 +140,32 @@ if __name__ == "__main__":
             extTokList.extend(x[1])
         return extTokList
 
+    # make dictionary
+
+    # frequecy of word direct
+    def masterDictionaryCountMethod(listWords):
+        dictCount = dict((x,listWords.count(x)) for x in set(listWords))
+        print(dictCount)
+        return dictCount
+
+    # n total number of requirement
+    def countAllRequirement(low,high):
+        totalAmountRequirements =len(low)+len(high)
+        print(totalAmountRequirements)
+        return totalAmountRequirements
+
+    # in how many requirements is the word 
+
+    #list no duplicates
+    def noDubListMethode(list):
+        newlist = []
+        for i in list:
+            if i not in newlist:
+                newlist.append(i)
+        print("noDubList")
+        print(newlist)
+        return newlist
+
     dataLow = getInputLowRequirements()
     dataHigh = getInputHighRequirements()
 
@@ -147,12 +173,25 @@ if __name__ == "__main__":
     tokenizeDataLow = tokenizeAllRequirements(dataLow)
     tokenizeDataHigh = tokenizeAllRequirements(dataHigh)
 
+
+
     extTokListLow = extendsAllTokenizedLists(tokenizeDataLow)
     print("extTokListLow")
     print(extTokListLow)
     extTokListHigh = extendsAllTokenizedLists(tokenizeDataHigh)
+    print(len(extTokListHigh))
+    print(extTokListHigh)
+    extTokListHigh.extend(extTokListLow)
+    extTokListOriginal = extTokListHigh
+    extTokListCopy = extTokListOriginal
+    extTokListCopy1 = extTokListOriginal
 
+    noDublist = noDubListMethode(extTokListCopy1)
 
+    masterDictionaryEmpty = { word : 0 for word in extTokListHigh}
+    print(masterDictionaryEmpty)
+    masterDictionaryCount = masterDictionaryCountMethod(extTokListCopy)
+    totalAmountRequirements = countAllRequirement(tokenizeDataLow,tokenizeDataHigh)
 
 
     write_output_file()
