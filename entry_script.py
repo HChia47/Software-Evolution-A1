@@ -3,6 +3,7 @@ import sys
 import nltk
 import pandas as pd
 import numpy as np
+import math
 nltk.download('punkt')
 nltk.download('stopwords')
 from nltk.tokenize import word_tokenize
@@ -142,6 +143,14 @@ if __name__ == "__main__":
         return extTokList
 
     # Complete master dictionary
+    def masterDictionaryFinished(dictionary,dictionary2):
+        for k in dictionary.keys():
+            dictionary[k] = dictionary[k] * dictionary2[k]
+            print(dictionary[k])
+        # print(result)
+        return dictionary
+
+    
 
     # frequecy of word dictionary
     def masterDictionaryCountMethod(listWords):
@@ -164,6 +173,14 @@ if __name__ == "__main__":
                     emptyMasterDict[word] += 1
                 i+=1
         return emptyMasterDict
+
+    # idf value for every key in master dictionary
+    def idfMasterDictionary(dictionary, totalRequirements):
+        for key in dictionary:
+            dictionary[key] = math.log2(totalRequirements/dictionary.get(key))
+        print(dictionary)
+        return dictionary
+
                 
                 
     #list no duplicates
@@ -208,7 +225,9 @@ if __name__ == "__main__":
     print(masterDictionaryEmpty)
     masterDictionaryFull = masterDictionaryEmpty
     print(masterDictionaryFull)
-
+    masterDictionaryIDF = idfMasterDictionary(masterDictionaryFull,totalAmountRequirements)
+    masterDictionaryComplete = masterDictionaryFinished(masterDictionaryIDF, masterDictionaryCount)
+    print(masterDictionaryComplete)
 
 
     write_output_file()
