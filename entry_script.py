@@ -11,6 +11,7 @@ from nltk.corpus import stopwords
 from nltk.tokenize import RegexpTokenizer
 from nltk.stem.porter import *
 from collections import Counter
+from scipy import spatial
 
 
 def write_output_file():
@@ -179,9 +180,7 @@ if __name__ == "__main__":
         for key in dictionary:
             dictionary[key] = math.log2(totalRequirements/dictionary.get(key))
         print(dictionary)
-        return dictionary
-
-                
+        return dictionary            
                 
     #list no duplicates
     def noDubListMethode(list):
@@ -191,7 +190,42 @@ if __name__ == "__main__":
                 newlist.append(i)
         print("noDubList")
         print(newlist)
-        return newlist
+        sortedlist = sorted(newlist)
+        print("sortedlist")
+        print(sortedlist)
+        return sortedlist
+
+    def createVectorRepresentation(sortedNoDubTokenList, singleReqTokenList, masterDict):
+        vectorRep = []
+        for x in sortedNoDubTokenList:
+            if(x in singleReqTokenList):
+                vectorRep.append(masterDict[x])
+            else:
+                vectorRep.append(0)
+        #print("singleReqTokenList")
+        #print(singleReqTokenList)
+        #print("vectorRep")
+        #print(vectorRep)
+        return vectorRep
+
+    def createAllVectorRepresentations(sortedNoDubTokenList, tokenData, masterDict):
+        allVectorRep = []
+        for x in tokenData:
+            vectorRep = createVectorRepresentation(sortedNoDubTokenList, x[1], masterDict)
+            allVectorRep.append(vectorRep)
+        return allVectorRep
+
+    def calcCosineSimilarity(vector1, vector2):
+        result = 1 - spatial.distance.cosine(vector1, vector2)
+        return result
+
+    def calcSimilarityMatrix(highReqVectors, lowReqVectors):
+        simMatrix = np.zeros((len(highReqVectors), len(lowReqVectors)))
+        for i in range(len(highReqVectors)):
+            for j in range(len(lowReqVectors)):
+                simMatrix[i,j] = calcCosineSimilarity(highReqVectors[i], lowReqVectors[j])
+        return simMatrix
+
 
     dataLow = getInputLowRequirements()
     dataHigh = getInputHighRequirements()
@@ -216,18 +250,26 @@ if __name__ == "__main__":
     noDubList = noDubListMethode(extTokListCopy1)
 
     masterDictionaryEmpty = { word : 0 for word in extTokListHigh}
-    print(masterDictionaryEmpty)
     masterDictionaryCount = masterDictionaryCountMethod(extTokListCopy)
     totalAmountRequirements = countAllRequirement(tokenizeDataLow,tokenizeDataHigh)
     masterDictionaryEmpty = checkWordInNumberOfRequirements(noDubList,masterDictionaryEmpty,tokenizeDataLow)
-    print(masterDictionaryEmpty)
     masterDictionaryEmpty = checkWordInNumberOfRequirements(noDubList,masterDictionaryEmpty,tokenizeDataHigh)
-    print(masterDictionaryEmpty)
     masterDictionaryFull = masterDictionaryEmpty
-    print(masterDictionaryFull)
     masterDictionaryIDF = idfMasterDictionary(masterDictionaryFull,totalAmountRequirements)
     masterDictionaryComplete = masterDictionaryFinished(masterDictionaryIDF, masterDictionaryCount)
     print(masterDictionaryComplete)
 
+    print(noDubList)
+    vectorRepReqLow = createAllVectorRepresentations(noDubList, tokenizeDataLow, masterDictionaryComplete)
+    vectorRepReqHigh = createAllVectorRepresentations(noDubList, tokenizeDataHigh, masterDictionaryComplete)
+    print(vectorRepReqLow)
+    print(vectorRepReqLow[0])
+    print(len(vectorRepReqLow[0]))
+    print(vectorRepReqHigh[0])
+    print(len(vectorRepReqHigh[0]))
+    cosinesim = calcCosineSimilarity(vectorRepReqHigh[0], vectorRepReqLow[0])
+    print(cosinesim)
+    simMatrix = calcSimilarityMatrix(vectorRepReqHigh, vectorRepReqLow)
+    print(simMatrix)
 
     write_output_file()
