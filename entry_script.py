@@ -12,6 +12,7 @@ from nltk.tokenize import RegexpTokenizer
 from nltk.stem.porter import *
 from collections import Counter
 from scipy import spatial
+from sklearn.metrics import confusion_matrix
 
 
 def write_output_file(traceLinks):
@@ -285,6 +286,74 @@ def createTraceLinksFour(simMatrix, tokenDataLow, tokenDataHigh):
         traceLinks.append(currentHighReqLink)
     return traceLinks
 
+def getList(data):
+    listRequirements = data[:, 0]
+    listRequirements = listRequirements.tolist()
+    return listRequirements
+
+def createFunctionalRequirementUseCaseList(frList,useCaseList):
+
+    frUseCaseList= []
+    i = 0
+    while i < len(frList):
+        useCaseDict = {}
+        keys = useCaseList
+        for key in keys:
+            useCaseDict[key] =  0
+        frUseCaseList.append(useCaseDict)
+        i+=1
+    return frUseCaseList    
+
+def getManualLink():
+    with open('/input/links.csv', newline='') as f:
+        reader = csv.reader(f)
+        data1 = list(reader)
+    return data1
+
+def getToolLink():
+    with open('/output/links.csv', newline='') as f:
+        reader = csv.reader(f)
+        data1 = list(reader)
+    return data1
+
+def removeWhiteSpace(list):
+    returnlist = []
+    for usecase in list:
+        string = usecase.strip()
+        returnlist.append(string)
+    return returnlist
+
+def transformData(data):
+    datalistsplit = []
+    for line in data:
+        newline = []
+        newline = line[1].split(",")
+        newline = removeWhiteSpace(newline)
+        datalistsplit.append(newline)
+    datalistsplit.pop(0)
+    return datalistsplit
+
+
+def createBinaryList(binaryTraceLinkList, traceLink):
+    i=0
+    while i < len(binaryTraceLinkList):
+        j=0
+        while j < len(traceLink[i]):
+            if traceLink[i][j] in binaryTraceLinkList[i]:
+                binaryTraceLinkList[i][traceLink[i][j]] = 1
+            j+=1
+        i+=1
+    return binaryTraceLinkList
+
+def onlyBinaryValues(binaryList):
+    completeBinaryList = []
+    for dicts in binaryList:
+        binaryValues = dicts.values()
+        print(binaryValues)
+        completeBinaryList.extend(binaryValues)
+    return completeBinaryList
+
+
 if __name__ == "__main__":
     '''
     Entry point for the script
@@ -370,3 +439,57 @@ if __name__ == "__main__":
     print("links")
     print(links)
     write_output_file(links)
+
+    # 
+    #
+    # Get confusion matrix out of results
+    #
+    #
+    
+
+    #get low and high requirements datalist
+    dataLow = getInputLowRequirements()
+    dataHigh = getInputHighRequirements()
+
+    #get all usecases and functional requirements
+    useCaseList = getList(dataLow)
+    functionalRequirementList = getList(dataHigh)
+
+    #create two binary empty confusion matrix set with manual value and tool value
+    binaryTraceLinkManualList = createFunctionalRequirementUseCaseList(functionalRequirementList,useCaseList)
+    binaryTraceLinkToolList = createFunctionalRequirementUseCaseList(functionalRequirementList,useCaseList)
+
+    #get data of all trace-link files
+    data1 = getManualLink()
+    data2 = getToolLink()
+
+    #get all trace links in cvs file in double list format
+    manualTraceLinkUseCases = transformData(data1)
+    toolTraceLinkUseCases = transformData(data2)
+
+    #fill in empty confusion matrix set values
+    binaryTraceLinkManualList = createBinaryList(binaryTraceLinkManualList , manualTraceLinkUseCases)
+    binaryTraceLinkToolList = createBinaryList(binaryTraceLinkToolList , toolTraceLinkUseCases)
+
+    #tranform it in a from such that it can be filled in function confusion matrix
+    binaryTraceLinkManualList = onlyBinaryValues(binaryTraceLinkManualList)
+    binaryTraceLinkToolList = onlyBinaryValues(binaryTraceLinkToolList)
+
+    #create the actual confusion matrix
+    conf_mat = confusion_matrix(binaryTraceLinkManualList, binaryTraceLinkToolList)
+
+    tn, fp, fn, tp = conf_mat.ravel()
+
+    recall = tp/(fn+tp) 
+    precision = tp/(fp+tp)
+    fMeasure = (2*recall*precision)/(precision+recall)
+    print(conf_mat)
+    print("tn : " + str(tn))
+    print("fp : " + str(fp))
+    print("fn : " + str(fn))
+    print("tp : " + str(tp))
+    print("recall: "+ str(recall))
+    print("precision: "+ str(precision))
+    print("fMeasure: "+ str(fMeasure))
+
+    

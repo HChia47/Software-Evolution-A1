@@ -2,3 +2,4 @@ nltk
 pandas
 scipy
 numpy
+sklearn
