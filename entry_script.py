@@ -28,7 +28,7 @@ def write_output_file(traceLinks):
         fieldnames = ["id", "links"]
 
         writer.writerow(fieldnames)
-
+        #loop through the links and get the IDs to add to the writer in the correct format
         for x in traceLinks:
             tempX = x
             strY = ""  
@@ -40,11 +40,13 @@ def write_output_file(traceLinks):
                     strY += x[1][y]
             writer.writerow([x[0], strY])
 
+#read the requirements from the low.csv file and create a numpy array for the data in it
 def getInputLowRequirements():
         df = pd.read_csv("/input/low.csv")
         dfnp = df.to_numpy()
         return dfnp
 
+#read the requirements from the high.csv file and create a numpy array for the data in it
 def getInputHighRequirements():
     df = pd.read_csv("/input/high.csv")
     dfnp = df.to_numpy()
@@ -71,7 +73,7 @@ def getInputHighRequirements():
 #                 i+=1   
 #     return tokens
 
-# Tokenize a sentence and remove commas and dots
+# Tokenize a sentence and remove commas and dots and remove stopwords
 def tokenizeSentenceRegex(sentence):
     tokenizer = RegexpTokenizer(r'\w+')
     tokens = tokenizer.tokenize(sentence)
@@ -85,12 +87,12 @@ def tokenizeSentenceRegex(sentence):
             i+=1   
     return tokens
 
+
 def stemmedSentences(list):
     stemmedlist = [stemmer.stem(token) for token in list ]
     return stemmedlist
     
-
-
+#tokenizes all requirements and return it in a list with elements of the format [ID, TokenizedRequirement]
 def tokenizeAllRequirements(data):
     listReqAndTokens = []
     allReqIDs = data[:, 0]
@@ -99,8 +101,8 @@ def tokenizeAllRequirements(data):
     for x in allReqSentences:
         allReqTokenizedSentences.append(tokenizeSentenceRegex(x))
     
-    print("allReqTokenizedSentences")
-    print(allReqTokenizedSentences)
+    #print("allReqTokenizedSentences")
+    #print(allReqTokenizedSentences)
 
     allReqTokenizedStemmedSentences = []
     for x in allReqTokenizedSentences:
@@ -110,11 +112,12 @@ def tokenizeAllRequirements(data):
         tempList = [ID, Sentence]
         listReqAndTokens.append(tempList)
 
-    print("listReqAndTokens")    
-    print(listReqAndTokens)
-    print(type(listReqAndTokens))
+    #print("listReqAndTokens")    
+    #print(listReqAndTokens)
+    #print(type(listReqAndTokens))
     return listReqAndTokens
 
+#adds all tokens of all requirements together (needed to create master vocabulary)
 def extendsAllTokenizedLists(tokenizedData):
     extTokList = []
     for x in tokenizedData:
@@ -173,6 +176,7 @@ def noDubListMethode(list):
     print(sortedlist)
     return sortedlist
 
+#create a vector representation for a requirement
 def createVectorRepresentation(sortedNoDubTokenList, singleReqTokenList, masterDict):
     vectorRep = []
     for x in sortedNoDubTokenList:
@@ -186,6 +190,7 @@ def createVectorRepresentation(sortedNoDubTokenList, singleReqTokenList, masterD
     #print(vectorRep)
     return vectorRep
 
+#create a vector representation for all requirements that are in the parameter tokenData
 def createAllVectorRepresentations(sortedNoDubTokenList, tokenData, masterDict):
     allVectorRep = []
     for x in tokenData:
@@ -193,10 +198,12 @@ def createAllVectorRepresentations(sortedNoDubTokenList, tokenData, masterDict):
         allVectorRep.append(vectorRep)
     return allVectorRep
 
+#Calculates the cosine similarity between a high and low level requirement vector representation
 def calcCosineSimilarity(vector1, vector2):
     result = 1 - spatial.distance.cosine(vector1, vector2)
     return result
 
+#Calculates the similarity matrix with all combination of high and low level requirement vector representations
 def calcSimilarityMatrix(highReqVectors, lowReqVectors):
     simMatrix = np.zeros((len(highReqVectors), len(lowReqVectors)))
     for i in range(len(highReqVectors)):
@@ -204,6 +211,7 @@ def calcSimilarityMatrix(highReqVectors, lowReqVectors):
             simMatrix[i,j] = calcCosineSimilarity(highReqVectors[i], lowReqVectors[j])
     return simMatrix
 
+#creates the tracelinks and the method of doing so according to the matchtype
 def createTracelinks(simMatrix, tokenDataLow, tokenDataHigh, matchtype):
     traceLinks = []
     if(matchtype == 1):
@@ -216,6 +224,7 @@ def createTracelinks(simMatrix, tokenDataLow, tokenDataHigh, matchtype):
         traceLinks = createTraceLinksFour(simMatrix, tokenDataLow, tokenDataHigh)
     return traceLinks
 
+#creates tracelinks based on match_type 1, meaning a similarity score of at least >0
 def createTraceLinksOne(simMatrix, tokenDataLow, tokenDataHigh):
     matrixShape = simMatrix.shape
     rowLen = matrixShape[0]
@@ -232,6 +241,7 @@ def createTraceLinksOne(simMatrix, tokenDataLow, tokenDataHigh):
         traceLinks.append(currentHighReqLink)
     return traceLinks
 
+#creates tracelinks based on match_type 2, meaning a similarity score of at least 0.25
 def createTraceLinksTwo(simMatrix, tokenDataLow, tokenDataHigh):
     matrixShape = simMatrix.shape
     rowLen = matrixShape[0]
@@ -252,6 +262,9 @@ def createHighestSimList(simMatrix):
     highSim = np.amax(simMatrix, axis=1)
     return highSim
 
+#creates tracelinks based on match_type 3, meaning that for every high level requirement 
+#the highest similarity between the between the high and low requirement is found and used
+#to determine that it has to have at least a similarity score of sim(h, l') >= 0.67 sim(h,l)
 def createTraceLinksThree(simMatrix, tokenDataLow, tokenDataHigh):
     matrixShape = simMatrix.shape
     rowLen = matrixShape[0]
@@ -279,7 +292,7 @@ def createTraceLinksFour(simMatrix, tokenDataLow, tokenDataHigh):
         currentHighReqLink = []
         currentReqLinks = []
         for y in range(columnLen):
-            if(simMatrix[x,y] >= (0.67 * highestSimPerRow[x])):
+            if(simMatrix[x,y] >= (0.9 * highestSimPerRow[x])):
                 currentReqLinks.append(tokenDataLow[y][0])
         currentHighReqLink.append(tokenDataHigh[x][0])
         currentHighReqLink.append(currentReqLinks)
